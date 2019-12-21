@@ -3,7 +3,6 @@ package com.example.webcontent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -52,7 +51,7 @@ public class ImageDownloader extends AsyncTask<String, Bitmap, Void> {
         if(this.callback == null){
             return;
         }
-        Log.i("Bitmaps",bitmaps[0].toString());
+//        Log.i("Bitmaps",bitmaps[0].toString());
         this.callback.onCompleted(bitmaps[0]);
     }
 

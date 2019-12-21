@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity
     Button fetchButton;
     String html;
     ProgressBar progressBar;
+    int counter = 0; //For progress bar
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,25 +36,26 @@ public class MainActivity extends AppCompatActivity
 
         urlInput = findViewById(R.id.urlEditText);
         fetchButton = findViewById(R.id.fetchButton);
-
-        progressBar = new ProgressBar(this);
-        progressBar.setMax(100);
-        progressBar.isShown();
+        progressBar = findViewById(R.id.progressBar);
+        resetProgressBar();
     }
 
     @Override
     public void onCompleted(Bitmap bitmap) {
-        Log.i("In OnCompleted, Bitmap is: ", bitmap.toString());
+        // Loading images
         ImageButton imageButton = findViewById(getResources().getIdentifier(
                 "imageButton" + pos,
                 "id", getPackageName()
         ));
-        Log.i("In OnCompleted, ImageButton is: ", imageButton.toString());
+//        Log.i("In OnCompleted, ImageButton is: ", imageButton.toString());
 
         imageButton.setImageBitmap(bitmap);
         imageButton.setAdjustViewBounds(true);
-
         pos++;
+
+        // Image loading progress bar
+        counter++;
+        progressBar.setProgress(counter);
     }
 
     //Fetch button
@@ -62,13 +64,17 @@ public class MainActivity extends AppCompatActivity
         //Check if url pattern is valid
         if(Patterns.WEB_URL.matcher(urlInput.getText().toString()).matches()){
             try {
-                //Reset position to 0
+                //Clear list of imageURLs
+                imageURLs.clear();
+                //Reset imageButton position to 0
                 pos = 0;
+                // Reset progress bar
+                resetProgressBar();
                 // Retrieve HTML
                 DownloadTask downloadTask = new DownloadTask();
                 html = null;
                 html = downloadTask.execute(urlInput.getText().toString()).get();
-
+                Log.i("url", urlInput.getText().toString()); // TESTING
                 // Match HTML against Regex pattern
                 Pattern p = Pattern.compile("img src=\"(.*?)\"");
                 Matcher m = p.matcher(html);
@@ -92,5 +98,11 @@ public class MainActivity extends AppCompatActivity
         } else {
             Toast.makeText(getApplicationContext(),"Please enter valid Url!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void resetProgressBar(){
+        counter = 0;
+        progressBar.setProgress(0);
+        progressBar.setMax(20);
     }
 }
