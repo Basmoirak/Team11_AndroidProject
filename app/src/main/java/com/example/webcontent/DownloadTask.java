@@ -2,6 +2,7 @@ package com.example.webcontent;
 
 import android.os.AsyncTask;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -15,13 +16,15 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
         String result = "";
         URL url;
         HttpURLConnection urlConnection = null;
+        InputStream inputStream = null;
+        InputStreamReader reader = null;
 
         try {
             url = new URL(urls[0]);
 
             urlConnection = (HttpURLConnection) url.openConnection();
-            InputStream in = urlConnection.getInputStream();
-            InputStreamReader reader = new InputStreamReader(in);
+            inputStream = urlConnection.getInputStream();
+            reader = new InputStreamReader(inputStream);
             int data = reader.read();
 
             while (data != -1){
@@ -35,6 +38,9 @@ public class DownloadTask extends AsyncTask<String, Void, String> {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            FileUtils.close(inputStream);
+            FileUtils.close(reader);
         }
     }
 }

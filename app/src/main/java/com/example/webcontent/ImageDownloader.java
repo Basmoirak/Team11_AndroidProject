@@ -3,6 +3,7 @@ package com.example.webcontent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -17,12 +18,13 @@ public class ImageDownloader extends AsyncTask<String, Bitmap, Void> {
 
     @Override
     protected Void doInBackground(String... urls) {
+        InputStream inputStream = null;
+
         try {
-            for (int i = 0, ct = urls.length; i < ct; i ++ ){
+            for (int i = 0; i < urls.length; i ++ ){
 
                 URL url = new URL(urls[i]);
-                HttpURLConnection connection =
-                        (HttpURLConnection) url.openConnection();
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 if(connection == null){
                     return null;
                 }
@@ -30,7 +32,7 @@ public class ImageDownloader extends AsyncTask<String, Bitmap, Void> {
                 connection.setDoInput(true);
                 connection.connect();
 
-                InputStream inputStream = connection.getInputStream();
+                inputStream = connection.getInputStream();
                 Bitmap myBitMap = BitmapFactory.decodeStream(inputStream);
                 publishProgress(myBitMap);
             }
@@ -38,6 +40,8 @@ public class ImageDownloader extends AsyncTask<String, Bitmap, Void> {
         } catch (Exception e){
             e.printStackTrace();
             return null;
+        } finally {
+            FileUtils.close(inputStream);
         }
 
         return null;
@@ -48,7 +52,7 @@ public class ImageDownloader extends AsyncTask<String, Bitmap, Void> {
         if(this.callback == null){
             return;
         }
-
+        Log.i("Bitmaps",bitmaps[0].toString());
         this.callback.onCompleted(bitmaps[0]);
     }
 
