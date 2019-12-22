@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,8 +19,6 @@ import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -56,7 +53,7 @@ public class MainActivity extends AppCompatActivity
         progressBar = findViewById(R.id.progressBar);
         progressBarTextView = findViewById(R.id.progressBarTextView);
         defaultImageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.pokeball);
-        resetImages();
+        resetImageButtons();
         resetProgressBar(20);
     }
 
@@ -111,7 +108,7 @@ public class MainActivity extends AppCompatActivity
     //Fetch button
     public void onFetch(View view){
 
-        resetImages();
+        resetImageButtons();
         //Check if url pattern is valid
         if(Patterns.WEB_URL.matcher(urlInput.getText().toString()).matches()){
             try {
@@ -156,7 +153,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void resetImages(){
+    public void resetImageButtons(){
         for (int i = 0; i < 20; i++){
             ImageButton imageButton = findViewById(getResources().getIdentifier(
                     "imageButton" + i,
@@ -164,8 +161,12 @@ public class MainActivity extends AppCompatActivity
             ));
             imageButton.setTag(defaultImageBitmap);
             imageButton.setImageBitmap(defaultImageBitmap);
+            imageButton.setBackgroundColor(0x00000000);
             imageButton.setAdjustViewBounds(true);
         }
+
+        //Clear entire clicked buttons history
+        clickList.clear();
     }
 
     public String[] createImageURLs(){
@@ -177,7 +178,6 @@ public class MainActivity extends AppCompatActivity
         // Add all image urls from HTML to array
         while (m.find()) {
             if(Patterns.WEB_URL.matcher(m.group(1)).matches()){
-                Log.i("URL Matches", m.group(1));
                 imageURLs.add(m.group(1));
             }
         }
