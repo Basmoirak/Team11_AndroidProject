@@ -40,7 +40,8 @@ public class MainActivity extends AppCompatActivity
         fetchButton = findViewById(R.id.fetchButton);
         progressBar = findViewById(R.id.progressBar);
         progressBarTextView = findViewById(R.id.progressBarTextView);
-        resetProgressBar();
+        resetImages();
+        resetProgressBar(20);
     }
 
     @Override
@@ -50,7 +51,6 @@ public class MainActivity extends AppCompatActivity
                 "imageButton" + pos,
                 "id", getPackageName()
         ));
-//        Log.i("In OnCompleted, ImageButton is: ", imageButton.toString());
 
         imageButton.setImageBitmap(bitmap);
         imageButton.setAdjustViewBounds(true);
@@ -61,11 +61,7 @@ public class MainActivity extends AppCompatActivity
         progressBar.setProgress(counter);
 
         // Update progress bar status in text view
-        if(counter == 20){
-            progressBarTextView.setText("Download complete!");
-        } else {
-            progressBarTextView.setText("Downloading " + counter + " of 20 images...");
-        }
+        progressBarTextView.setText("Downloaded " + counter + " images");
     }
 
     //Fetch button
@@ -74,32 +70,48 @@ public class MainActivity extends AppCompatActivity
         //Check if url pattern is valid
         if(Patterns.WEB_URL.matcher(urlInput.getText().toString()).matches()){
             try {
+                //Reset images
+                resetImages();
                 //Clear list of imageURLs
                 imageURLs.clear();
                 //Reset imageButton position to 0
                 pos = 0;
-                // Reset progress bar
-                resetProgressBar();
                 // Retrieve HTML
                 DownloadTask downloadTask = new DownloadTask();
                 html = null;
                 html = downloadTask.execute(urlInput.getText().toString()).get();
-                Log.i("url", urlInput.getText().toString()); // TESTING
-                // Match HTML against Regex pattern
-                Pattern p = Pattern.compile("img src=\"(.*?)\"");
-                Matcher m = p.matcher(html);
+                if(html != null){
+                    Log.i("url", urlInput.getText().toString()); // TESTING
+                    // Match HTML against Regex pattern
+                    Pattern p = Pattern.compile("img src=\"(.*?)\"");
+                    Matcher m = p.matcher(html);
 
-                // Add all image urls from HTML to array
-                while (m.find()) {
-                    imageURLs.add(m.group(1));
+                    // Add all image urls from HTML to array
+                    while (m.find()) {
+                        imageURLs.add(m.group(1));
+                    }
+                    Log.i("IMAGE LIST SIZE", imageURLs.size() + "");
+                    if(imageURLs.size() < 20){
+                        for (int i = 0; i < imageURLs.size(); i++){
+                            paths[i] = imageURLs.get(i);
+                        }
+
+                    } else {
+                        for(int i = 0; i < 20; i++){
+                            paths[i] = imageURLs.get(i);
+                        }
+                    }
+                        // Reset progress bar
+                        if(imageURLs.size() < 20){
+                            resetProgressBar(imageURLs.size());
+                        } else {
+                            resetProgressBar(20);
+                        }
+                        new ImageDownloader(this).execute(paths);
+
+                } else {
+                    Toast.makeText(this, "Invalid URL", Toast.LENGTH_SHORT).show();
                 }
-
-                //Limit to 20 image urls in array
-                for(int i = 0; i < 20; i++){
-                    paths[i] = imageURLs.get(i + 1);
-                }
-
-                new ImageDownloader(this).execute(paths);
 
             } catch(Exception e) {
                 e.printStackTrace();
@@ -110,10 +122,25 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void resetProgressBar(){
+    public void resetProgressBar(int size){
         counter = 0;
         progressBar.setProgress(0);
-        progressBar.setMax(20);
+        progressBar.setMax(size);
         progressBarTextView.setText("");
+    }
+
+    public void resetImages(){
+        pos = 0;
+        for (int i = 0; i < 20; i++){
+            ImageButton imageButton = findViewById(getResources().getIdentifier(
+                    "imageButton" + pos,
+                    "id", getPackageName()
+            ));
+
+            imageButton.setImageResource(R.drawable.pokeball);
+            imageButton.setAdjustViewBounds(true);
+            pos++;
+        }
+
     }
 }

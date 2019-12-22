@@ -3,6 +3,8 @@ package com.example.webcontent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.util.Patterns;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -22,18 +24,22 @@ public class ImageDownloader extends AsyncTask<String, Bitmap, Void> {
         try {
             for (int i = 0; i < urls.length; i ++ ){
 
-                URL url = new URL(urls[i]);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                if(connection == null){
-                    return null;
+                    Log.i("EMPTY: ", urls[i]);
+                if(Patterns.WEB_URL.matcher(urls[i]).matches()){
+
+                    URL url = new URL(urls[i]);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    if(connection == null){
+                        return null;
+                    }
+
+//                    connection.setDoInput(true);
+                    connection.connect();
+
+                    inputStream = connection.getInputStream();
+                    Bitmap myBitMap = BitmapFactory.decodeStream(inputStream);
+                    publishProgress(myBitMap);
                 }
-
-//                connection.setDoInput(true);
-                connection.connect();
-
-                inputStream = connection.getInputStream();
-                Bitmap myBitMap = BitmapFactory.decodeStream(inputStream);
-                publishProgress(myBitMap);
             }
 
         } catch (Exception e){
@@ -51,7 +57,6 @@ public class ImageDownloader extends AsyncTask<String, Bitmap, Void> {
         if(this.callback == null){
             return;
         }
-//        Log.i("Bitmaps",bitmaps[0].toString());
         this.callback.onCompleted(bitmaps[0]);
     }
 
