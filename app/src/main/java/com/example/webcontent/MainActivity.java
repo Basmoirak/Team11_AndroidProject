@@ -2,6 +2,7 @@ package com.example.webcontent;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -19,7 +20,10 @@ import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +32,7 @@ public class MainActivity extends AppCompatActivity
 
     int pos = 0;
     ArrayList<String> imageURLs = new ArrayList<String>();
+    ArrayList<Bitmap> clickList = new ArrayList<Bitmap>();
     String[] paths = new String[20];
     EditText urlInput;
     TextView progressBarTextView;
@@ -35,11 +40,9 @@ public class MainActivity extends AppCompatActivity
     String html;
     ProgressBar progressBar;
     MenuItem countNumber;
+    Bitmap defaultImageBitmap;
 
     int counter = 0; //For progress bar
-
-    boolean clicked = false;
-    int clickedImages = 0;
 
     byte[] byteArray;
 
@@ -52,6 +55,8 @@ public class MainActivity extends AppCompatActivity
         fetchButton = findViewById(R.id.fetchButton);
         progressBar = findViewById(R.id.progressBar);
         progressBarTextView = findViewById(R.id.progressBarTextView);
+        defaultImageBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.pokeball);
+        resetImages();
         resetProgressBar(20);
     }
 
@@ -106,6 +111,7 @@ public class MainActivity extends AppCompatActivity
     //Fetch button
     public void onFetch(View view){
 
+        resetImages();
         //Check if url pattern is valid
         if(Patterns.WEB_URL.matcher(urlInput.getText().toString()).matches()){
             try {
@@ -150,6 +156,18 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void resetImages(){
+        for (int i = 0; i < 20; i++){
+            ImageButton imageButton = findViewById(getResources().getIdentifier(
+                    "imageButton" + i,
+                    "id", getPackageName()
+            ));
+            imageButton.setTag(defaultImageBitmap);
+            imageButton.setImageBitmap(defaultImageBitmap);
+            imageButton.setAdjustViewBounds(true);
+        }
+    }
+
     public String[] createImageURLs(){
         // Match HTML against Regex pattern
         Pattern p = Pattern.compile("img src=\"(.*?)\"");
@@ -181,44 +199,48 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void buttonClick(View view) {
-        if(clickedImages >= 6){
-            Intent intent = new Intent(this, Game.class);
-            startActivity(intent);
-        }
-        if(clicked == false){
 
-            clicked = true;
-            ImageButton button = (ImageButton) view;
+        //Don't allow users to click on default image
+        if(view.getTag() == defaultImageBitmap){
+            return;
+        }
+
+        final ImageButton button = (ImageButton) view;
+        boolean isClicked = (clickList.stream().anyMatch(new Predicate<Bitmap>() {
+                                            @Override
+                                            public boolean test(Bitmap bmp) {
+                                                return bmp == button.getTag();
+                                            }}));
+        if(!isClicked){
             button.setBackgroundColor(Color.BLUE);
+            clickList.add((Bitmap) button.getTag());
 
             try {
                 Bitmap bmp = ((BitmapDrawable)button.getDrawable()).getBitmap();
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byteArray = stream.toByteArray();
-                FileOutputStream fo = openFileOutput("image"+clickedImages, MODE_PRIVATE);
+                FileOutputStream fo = openFileOutput("image" + (clickList.size() - 1), MODE_PRIVATE);
 
                 fo.write(byteArray);
 
-                clickedImages++;
                 fo.flush();
                 fo.close();
                 stream.close();
 
-                countNumber.setTitle(clickedImages);
+                if(clickList.size() == 6){
+                    Intent intent = new Intent(this, Game.class);
+                    startActivity(intent);
+                }
+
             } catch (Exception e){
                 e.printStackTrace();
             }
+        } else {
+            button.setBackgroundColor(0x00000000);
+            clickList.remove((Bitmap) button.getTag());
+        }
 
-        }
-        else {
-            clicked = false;
-            view.setBackgroundColor(0x00000000);
-            //clickedImages--;
-        }
     }
 
-    public void updatedClickedImages(){
-
-    }
 }

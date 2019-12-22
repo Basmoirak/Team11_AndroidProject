@@ -3,7 +3,6 @@ package com.example.webcontent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.util.Patterns;
 
 import java.io.InputStream;
