@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity
         fetchButton = findViewById(R.id.fetchButton);
         progressBar = findViewById(R.id.progressBar);
         progressBarTextView = findViewById(R.id.progressBarTextView);
-        resetProgressBar();
+        resetProgressBar(20);
     }
 
     //create action bar icon
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity
                 "imageButton" + pos,
                 "id", getPackageName()
         ));
-//        Log.i("In OnCompleted, ImageButton is: ", imageButton.toString());
+
         imageButton.setTag(bitmap);
         imageButton.setImageBitmap(bitmap);
         imageButton.setAdjustViewBounds(true);
@@ -96,10 +96,10 @@ public class MainActivity extends AppCompatActivity
         progressBar.setProgress(counter);
 
         // Update progress bar status in text view
-        if(counter == 20){
-            progressBarTextView.setText("Download complete!");
-        } else {
+        if(counter != 20){
             progressBarTextView.setText("Downloading " + counter + " of 20 images...");
+        }else{
+            progressBarTextView.setText("Download Completed");
         }
     }
 
@@ -113,29 +113,22 @@ public class MainActivity extends AppCompatActivity
                 imageURLs.clear();
                 //Reset imageButton position to 0
                 pos = 0;
-                // Reset progress bar
-                resetProgressBar();
                 // Retrieve HTML
                 DownloadTask downloadTask = new DownloadTask();
-                html = null;
                 html = downloadTask.execute(urlInput.getText().toString()).get();
-                Log.i("url", urlInput.getText().toString()); // TESTING
-                // Match HTML against Regex pattern
-                Pattern p = Pattern.compile("img src=\"(.*?)\"");
-                Matcher m = p.matcher(html);
+                if(html != null){
 
-                // Add all image urls from HTML to array
-                while (m.find()) {
-                    imageURLs.add(m.group(1));
+                    // Add all image urls to paths
+                    paths = createImageURLs();
+
+                    //Reset progress bar
+                    resetProgressBar(imageURLs.size());
+
+                    new ImageDownloader(this).execute(paths);
+
+                } else {
+                    Toast.makeText(getApplicationContext(),"Please enter valid Url!", Toast.LENGTH_SHORT).show();
                 }
-
-                //Limit to 20 image urls in array
-                for(int i = 0; i < 20; i++){
-                    paths[i] = imageURLs.get(i + 1);
-                    Log.i("urls", paths[i]);
-                }
-
-                new ImageDownloader(this).execute(paths);
 
             } catch(Exception e) {
                 e.printStackTrace();
@@ -146,16 +139,51 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void resetProgressBar(){
+    public void resetProgressBar(int size){
         counter = 0;
         progressBar.setProgress(0);
-        progressBar.setMax(20);
         progressBarTextView.setText("");
+        if(size < 20){
+            progressBar.setMax(size);
+        } else {
+            progressBar.setMax(20);
+        }
+    }
+
+    public String[] createImageURLs(){
+        // Match HTML against Regex pattern
+        Pattern p = Pattern.compile("img src=\"(.*?)\"");
+        Matcher m = p.matcher(html);
+        String[] urlArray = new String[20];
+
+        // Add all image urls from HTML to array
+        while (m.find()) {
+            if(Patterns.WEB_URL.matcher(m.group(1)).matches()){
+                Log.i("URL Matches", m.group(1));
+                imageURLs.add(m.group(1));
+            }
+        }
+
+        if(imageURLs.size() < 20){
+            for(int i = 0; i < imageURLs.size(); i++){
+                urlArray[i] = imageURLs.get(i);
+            }
+            for(int i = imageURLs.size(); i < 20; i++){
+                urlArray[i] = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/No_image_3x4.svg/1280px-No_image_3x4.svg.png";
+            }
+        } else {
+            for(int i = 0; i < 20; i++){
+                urlArray[i] = imageURLs.get(i);
+            }
+        }
+
+        return urlArray;
     }
 
     public void buttonClick(View view) {
         if(clickedImages >= 6){
-            return;
+            Intent intent = new Intent(this, Game.class);
+            startActivity(intent);
         }
         if(clicked == false){
 
@@ -175,13 +203,12 @@ public class MainActivity extends AppCompatActivity
                 clickedImages++;
                 fo.flush();
                 fo.close();
+                stream.close();
 
                 countNumber.setTitle(clickedImages);
-
             } catch (Exception e){
                 e.printStackTrace();
             }
-
 
         }
         else {

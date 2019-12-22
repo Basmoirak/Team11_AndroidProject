@@ -22,23 +22,24 @@ public class ImageDownloader extends AsyncTask<String, Bitmap, Void> {
         InputStream inputStream = null;
 
         try {
+
             for (int i = 0; i < urls.length; i ++ ){
 
-                    Log.i("EMPTY: ", urls[i]);
                 if(Patterns.WEB_URL.matcher(urls[i]).matches()){
-
                     URL url = new URL(urls[i]);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     if(connection == null){
                         return null;
                     }
 
-//                    connection.setDoInput(true);
+                    connection.setDoInput(true);
                     connection.connect();
 
                     inputStream = connection.getInputStream();
                     Bitmap myBitMap = BitmapFactory.decodeStream(inputStream);
                     publishProgress(myBitMap);
+                } else {
+                    return null;
                 }
             }
 
