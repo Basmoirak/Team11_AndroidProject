@@ -28,7 +28,7 @@ public class ImageDownloader extends AsyncTask<String, Bitmap, Void> {
                     return null;
                 }
 
-                connection.setDoInput(true);
+//                connection.setDoInput(true);
                 connection.connect();
 
                 inputStream = connection.getInputStream();

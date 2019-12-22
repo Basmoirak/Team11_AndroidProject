@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity
     ArrayList<String> imageURLs = new ArrayList<String>();
     String[] paths = new String[20];
     EditText urlInput;
+    TextView progressBarTextView;
     Button fetchButton;
     String html;
     ProgressBar progressBar;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity
         urlInput = findViewById(R.id.urlEditText);
         fetchButton = findViewById(R.id.fetchButton);
         progressBar = findViewById(R.id.progressBar);
+        progressBarTextView = findViewById(R.id.progressBarTextView);
         resetProgressBar();
     }
 
@@ -56,6 +59,13 @@ public class MainActivity extends AppCompatActivity
         // Image loading progress bar
         counter++;
         progressBar.setProgress(counter);
+
+        // Update progress bar status in text view
+        if(counter == 20){
+            progressBarTextView.setText("Download complete!");
+        } else {
+            progressBarTextView.setText("Downloading " + counter + " of 20 images...");
+        }
     }
 
     //Fetch button
@@ -104,5 +114,6 @@ public class MainActivity extends AppCompatActivity
         counter = 0;
         progressBar.setProgress(0);
         progressBar.setMax(20);
+        progressBarTextView.setText("");
     }
 }
