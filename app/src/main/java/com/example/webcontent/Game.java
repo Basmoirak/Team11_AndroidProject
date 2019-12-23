@@ -32,7 +32,7 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
     private MemoryButton selectedButton2;
     private MemoryButton button;
     private boolean isBusy;
-
+    private MediaPlayer mediaPlayer;
     ArrayList<byte[]> arrayOfByteArray;
 
     private TextView matchesCountView;
@@ -57,6 +57,12 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mediaPlayer.stop();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         mStarted = false;
@@ -68,9 +74,9 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-        MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.clearday);
+        mediaPlayer = MediaPlayer.create(this, R.raw.clearday);
         mediaPlayer.start();
-        mediaPlayer.isLooping();
+        mediaPlayer.setLooping(true);
 
         handler = new Handler();
 
@@ -178,13 +184,9 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
             //updating match progress
             if(matchesCounter == 6){
                 matchesCountView.setText("PERFECT!");
-//                Intent intent = new Intent(this, Finish.class);
-//                intent.putExtra("status", "You have won the game.");
-//                secondElapsed = 30 - secondElapsed;
-//                intent.putExtra("secondElapsed",  "You finished within "+secondElapsed+" seconds.");
-//                startActivity(intent);
                     Intent intent = new Intent(this, MainActivity.class);
                     startActivity(intent);
+                    finish();
             }
             else{
                 matchesCountView.setText(matchesCounter+ " / " + totalClicks);

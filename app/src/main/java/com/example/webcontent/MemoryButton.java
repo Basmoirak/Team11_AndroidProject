@@ -28,10 +28,6 @@ public class MemoryButton extends AppCompatImageButton {
         this.column = c;
         this.frontImageId = bitmap;
 
-//        frontImage = AppCompatDrawableManager.get().getDrawable(context, frontImageId);
-//        backImage = AppCompatDrawableManager.get().getDrawable(context, R.drawable.image_q);
-//       Log.d("test1", "frontImageId" + frontImageDrawableId);
-//       Log.d("testw", "image_q" + R.drawable.image_q);
 
         frontImage = bitmap;
         backImage = BitmapFactory.decodeResource(getResources(), R.drawable.image_q);

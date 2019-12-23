@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -37,6 +38,8 @@ public class MainActivity extends AppCompatActivity
     ProgressBar progressBar;
     Bitmap defaultImageBitmap;
 
+    MediaPlayer mediaPlayer;
+
     int counter = 0; //For progress bar
 
     byte[] byteArray;
@@ -46,9 +49,9 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.photoalbum);
+        mediaPlayer = MediaPlayer.create(this, R.raw.photoalbum);
         mediaPlayer.start();
-        mediaPlayer.isLooping();
+        mediaPlayer.setLooping(true);
 
         urlInput = findViewById(R.id.urlEditText);
         fetchButton = findViewById(R.id.fetchButton);
@@ -59,6 +62,27 @@ public class MainActivity extends AppCompatActivity
         resetProgressBar(20);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        mediaPlayer.stop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mediaPlayer.isPlaying())
+            mediaPlayer.stop();
+        else
+            return;
+    }
+
+    @Override
+    protected void onResume() {
+        if(mediaPlayer != null && !mediaPlayer.isPlaying())
+            mediaPlayer.start();
+        super.onResume();
+    }
 
 
     @Override
@@ -193,7 +217,7 @@ public class MainActivity extends AppCompatActivity
                                                 return bmp == button.getTag();
                                             }}));
         if(!isClicked){
-            button.setBackgroundColor(Color.BLUE);
+            button.setBackgroundColor(getResources().getColor(R.color.lightGreen));
             clickList.add((Bitmap) button.getTag());
 
             try {
@@ -212,6 +236,7 @@ public class MainActivity extends AppCompatActivity
                 if(clickList.size() == 6){
                     Intent intent = new Intent(this, Game.class);
                     startActivity(intent);
+                    finish();
                 }
 
             } catch (Exception e){
