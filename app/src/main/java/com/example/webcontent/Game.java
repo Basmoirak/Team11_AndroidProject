@@ -189,7 +189,7 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
                     finish();
             }
             else{
-                matchesCountView.setText(matchesCounter+ " / " + totalClicks);
+                matchesCountView.setText(matchesCounter+ " / " + totalClicks + " attempts");
             }
             return;
         }
@@ -198,7 +198,7 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
             selectedButton2.flip();
             isBusy = true;
             totalClicks++;
-            matchesCountView.setText(matchesCounter+ " / " + totalClicks);
+            matchesCountView.setText(matchesCounter+ " / " + totalClicks + " attempts");
 
             //flipping back to normal pic after delaying 5 sec
             handler.postDelayed(new Runnable() {
