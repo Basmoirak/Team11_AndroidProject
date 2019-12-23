@@ -7,8 +7,6 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Patterns;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,7 +34,6 @@ public class MainActivity extends AppCompatActivity
     Button fetchButton;
     String html;
     ProgressBar progressBar;
-    MenuItem countNumber;
     Bitmap defaultImageBitmap;
 
     int counter = 0; //For progress bar
@@ -57,27 +54,6 @@ public class MainActivity extends AppCompatActivity
         resetProgressBar(20);
     }
 
-    //create action bar icon
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // R.menu.mymenu is a reference to an xml file named mymenu.xml which should be inside your res/menu directory.
-        // If you don't have res/menu, just create a directory named "menu" inside res
-        getMenuInflater().inflate(R.menu.menu, menu);
-        countNumber = menu.findItem(R.id.count);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    // handle button activities
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_game) {
-           Intent intent = new Intent(this, Game.class);
-           startActivity(intent);
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
 
     @Override

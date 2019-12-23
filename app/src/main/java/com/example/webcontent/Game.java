@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.GridLayout;
@@ -40,31 +41,58 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
 
     private long secondElapsed;
 
+    private Runnable runnable = null;
+    private Handler handler;
+    private boolean mStarted;
+    private int totalClicks = 0;
+
+    long startTime = SystemClock.uptimeMillis();
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mStarted = true;
+        handler.postDelayed(runnable, 1000L);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mStarted = false;
+        handler.removeCallbacks(runnable);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+        handler = new Handler();
 
         arrayOfByteArray = (ArrayList<byte[]>) getIntent().getSerializableExtra("list");
 
         matchesCountView = findViewById(R.id.matchesCountView);
         timerView = findViewById(R.id.timerView);
 
-        new CountDownTimer(30000, 1000) {
-            @Override
-            public void onTick(long l) {
-                timerView.setText(l/1000 + " seconds remaining.");
-                secondElapsed = l/1000;
-            }
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (mStarted) {
+                        long milliSecondTime = 0L;
+                        long timeBuff = 0L;
+                        long updatedTime = 0L;
 
-            @Override
-            public void onFinish() {
-                Intent intent = new Intent(getBaseContext(), Finish.class);
-                intent.putExtra("status", "You lost the game, haha.");
-                startActivity(intent);
-            }
-        }.start();
+                        milliSecondTime = SystemClock.uptimeMillis() - startTime;
+
+                        updatedTime = (timeBuff + milliSecondTime) / 1000;
+
+                        timerView.setText(String.format("%02d:%02d", updatedTime / 60, updatedTime % 60));
+
+                        handler.postDelayed(runnable, 1000L);
+                    }
+                }
+
+
+            };
 
         GridLayout grid = findViewById(R.id.gridLayout);
         int numberOfC = grid.getColumnCount();
@@ -140,18 +168,20 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
             selectedButton1 = null;
 
             matchesCounter++;
+            totalClicks++;
             //updating match progress
             if(matchesCounter == 6){
                 matchesCountView.setText("PERFECT!");
-                Intent intent = new Intent(this, Finish.class);
-                intent.putExtra("status", "You have won the game.");
-                secondElapsed = 30 - secondElapsed;
-                intent.putExtra("secondElapsed",  "You finished within "+secondElapsed+" seconds.");
-                startActivity(intent);
-
+//                Intent intent = new Intent(this, Finish.class);
+//                intent.putExtra("status", "You have won the game.");
+//                secondElapsed = 30 - secondElapsed;
+//                intent.putExtra("secondElapsed",  "You finished within "+secondElapsed+" seconds.");
+//                startActivity(intent);
+                    Intent intent = new Intent(this, MainActivity.class);
+                    startActivity(intent);
             }
             else{
-                matchesCountView.setText(matchesCounter+"/6");
+                matchesCountView.setText(matchesCounter+ " / " + totalClicks);
             }
             return;
         }
@@ -159,9 +189,10 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
             selectedButton2 = button;
             selectedButton2.flip();
             isBusy = true;
+            totalClicks++;
+            matchesCountView.setText(matchesCounter+ " / " + totalClicks);
 
             //flipping back to normal pic after delaying 5 sec
-            final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
