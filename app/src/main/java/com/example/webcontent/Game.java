@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -66,6 +67,11 @@ public class Game extends AppCompatActivity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.clearday);
+        mediaPlayer.start();
+        mediaPlayer.isLooping();
+
         handler = new Handler();
 
         arrayOfByteArray = (ArrayList<byte[]>) getIntent().getSerializableExtra("list");
