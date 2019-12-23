@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity
 
     public String[] createImageURLs(){
         // Match HTML against Regex pattern
-        Pattern p = Pattern.compile("img src=\"(.*?)\"");
+        Pattern p = Pattern.compile("img.*?src=\"(.*?)\"");
         Matcher m = p.matcher(html);
         String[] urlArray = new String[20];
 
